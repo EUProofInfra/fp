@@ -7,13 +7,12 @@ import Control.DeepSeq
 import Data.Char
 import Data.List
 import Data.Maybe
-import System.Console.Readline
 import System.IO.Unsafe
 import System.Random
 
 import Sowpods
 
-import qualified Bram
+import qualified Blank as Bram
 
 {-
 
@@ -562,10 +561,8 @@ getInput = do
 -- Like readline, but EOF becomes "exit", and automatically builds history.
 getLineFancy :: String -> IO String
 getLineFancy prompt = do
-    mline <- readline prompt
-    case mline of
-        Nothing -> return "exit"
-        Just line -> addHistory line >> return line
+    putStr prompt
+    getLine
 
 -- A combination of intersection point, orientation, and how many spaces are
 -- free before/after that point to lay tiles on.
