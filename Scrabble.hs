@@ -3,8 +3,10 @@
 module Scrabble where
 
 import Control.Monad
+import Control.Monad.State
 import Control.DeepSeq
 import Data.Char
+import Data.Either
 import Data.List
 import Data.Maybe
 import System.Console.Readline
@@ -54,6 +56,12 @@ with all the work you managed to do.
 (7) There will be an additional set of advanced exercises to get a
 high 1st class mark. With this set, you will be able to get a low 1st
 class mark.
+
+(8) The sample solutions module only works in the lab, and also only after
+module load ghc. If you want to work elsewhere, or if you want to double check
+that your solutions don't depend on the Bram module, you can replace "import
+qualified Bram" by "import qualified Blank as Bram", and run ghci using "ghci
+Scrabble.hs". Sample solutions will then be unavailable to ghci.
 
 --------------------------------------------------------------------
   The Exercise - Scrabble
@@ -129,6 +137,11 @@ rule #2 (about completing a turn):
 rule #6 (about blanks)
     goes away, we don't have blanks.
 
+rule #7 (about not playing a word) becomes
+    If you cannot, or choose not to play a word, then you must discard all the
+    tiles on your rack and on your next turn you will have freshly drawn tiles
+    on your rack.
+
 rule #8 (about challenging a play)
     becomes irrelevant; word validity is checked by the computer.
 
@@ -190,7 +203,7 @@ type Move = (String, WordPos)
 -- A score is represented as an Int:
 type Score = Int
 
--- Find a tile on the board. Utility code give to you:
+-- Find a tile on the board. Utility code given to you:
 onBoard :: Pos -> Board -> Maybe Char
 onBoard (x, y) b = if withinBounds then b !! x !! y else Nothing
   where
@@ -213,7 +226,7 @@ onBoard (x, y) b = if withinBounds then b !! x !! y else Nothing
 --      vertically, then the positions just west and east of the intersection
 --      position may additionally be occupied.
 
--- Utility code give to you:
+-- Utility code given to you:
 validMove :: Move -> Board -> Bool
 validMove move@(w, (pos, orient)) b
     = uniqueIntersect && noConflicts && enoughRoom
@@ -238,12 +251,12 @@ validMove move@(w, (pos, orient)) b
     enoughRoom = all okAdjPos (adjacentToWord move)
     okAdjPos adjPos = adjPos `elem` allowedAdjPos || (adjPos `onBoard` b) == Nothing
 
--- Utility code give to you:
+-- Utility code given to you:
 movePositions :: Move -> [Pos]
 movePositions (w, ((x, y), H)) = [(x + i, y) | i <- [0..length w - 1]]
 movePositions (w, ((x, y), V)) = [(x, y + i) | i <- [0..length w - 1]]
 
--- Utility code give to you:
+-- Utility code given to you:
 adjacentToWord :: Move -> [Pos]
 adjacentToWord (w, ((x, y), H))
     = [(x-1, y), (x + length w, y)]
@@ -252,7 +265,7 @@ adjacentToWord (w, ((x, y), H))
 -- the line y=x.
 adjacentToWord (w, ((x, y), V)) = map transposePos (adjacentToWord (w, ((y, x), H)))
 
--- Utility code give to you:
+-- Utility code given to you:
 transposePos (x, y) = (y, x)
 transposeOrient V = H
 transposeOrient H = V
@@ -261,7 +274,7 @@ transposeWPos ((x, y), o) = ((y, x), transposeOrient o)
 
 
 -- Given one of the positions of a move, compute the letter that should go
--- there. Slow implementation. Utility code give to you:
+-- there. Slow implementation. Utility code given to you:
 moveLetter :: Move -> Pos -> Maybe Char
 moveLetter move@(w, ((x, y), _)) (x', y') = do
     guard $ (x', y') `elem` movePositions move
@@ -310,7 +323,7 @@ submultiset = Bram.submultiset
 formable :: String -> Rack -> Char -> Maybe String
 formable = Bram.formable
 
--- Utility code give to you:
+-- Utility code given to you:
 letterValue :: Char -> Score
 letterValue c | c `elem` "aeioulnstr" = 1
 letterValue c | c `elem` "dg" = 2
@@ -319,7 +332,7 @@ letterValue c | c `elem` "fhvwy" = 4
 letterValue c | c `elem` "k" = 5
 letterValue c | c `elem` "jx" = 8
 letterValue c | c `elem` "qz" = 10
-letterValue c | otherwise = error "not a valid letter"
+letterValue c | otherwise = error "letterValue: error: not a valid letter"
 
 -- Exercise, basic. Make a function to compute the value of a word for
 -- SCRABOL. Remember that SCRABOL, unlike Scrabble, does not have premium
@@ -356,7 +369,7 @@ autoResize = Bram.autoResize
 -- The following errors may occur when attempting to play:
 data PlayError = NoFitOnBoard | NotOnRack | NotAWord deriving (Show)
 
--- Utility code give to you:
+-- Utility code given to you:
 playMove :: Rack -> Move -> Dict -> Board -> Either PlayError (Board, Rack, Score)
 playMove rack move@(w, ((x, y), orient)) dict b = do
     -- Do-syntax for the Either monad!
@@ -483,7 +496,7 @@ fromList xs = do
   p <- liftM toRational $ getRandomR (0.0,s)
   return . fst . head $ dropWhile (\(_,q) -> q < p) cs
 
--- Utility data give to you:
+-- Utility data given to you:
 letterFrequencies :: [(Char, Rational)]
 letterFrequencies = [
         ('a', 9), ('b', 2), ('c', 2), ('d', 4), ('e', 12), ('f', 2), ('g', 3),
@@ -665,11 +678,11 @@ allWords3 = Bram.allWords3
 
 -- Utility code, for manual testing:
 printBoard :: Board -> IO ()
-printBoard b = checks `seq` actuallyPrint
+printBoard b = checks `mustBeTrueBefore` actuallyPrint
   where
     width = length b
     height = length (head b)
-    checks = checkRectangular
+    checks = length b > 0 && length (head b) > 0 && checkRectangular
     checkRectangular = all (== height) (map length b)
     transpB = transpose b
     actuallyPrint = do
@@ -679,9 +692,231 @@ printBoard b = checks `seq` actuallyPrint
         putStrLn $ " " ++ show2digs y ++ concat ["  " ++ showField c | c <- row]
     showField Nothing = "-"
     showField (Just c) = [c]
+    bool `mustBeTrueBefore` x = if not bool then error "printBoard: Not a valid board!" else x
 
 -- A right-aligned digit under 100.
 show2digs n | 0 <= 0 && n < 10 = " " ++ show n
 show2digs n | 0 <= 0 && n < 100 = show n
 
 
+-- The additional rather hard exercises, with which you can get >70%, start here.
+--
+-- An infinite list of letters.
+--
+-- We will sometimes give examples with finite letter streams, but when we
+-- mark we always test with infinite lists of letters. So your code does not
+-- have to work with finite lists of letters.
+type LetterStream = [Char]
+
+-- Exercise, rather hard. Generate an infinite list of letters.
+letterStream :: LRand LetterStream
+letterStream = let Bram.LRand f = Bram.letterStream in LRand f
+
+-- A FullMove is either a played word, or it is a decision not to play a word
+-- (for instance because there is no valid word you can form.)
+--
+-- Nothing means the computer chooses not to perform a move. This will get rid
+-- of all the letters on the rack, and replenish it from scratch. An AI must
+-- only choose Nothing if it cannot find a word to play.
+type FullMove = Maybe Move
+
+-- Utility code given to you:
+allMoves :: Dict -> Rack -> Board -> [FullMove]
+allMoves dict rack b = [Nothing] ++ properMoves
+  where
+    properMoves :: [FullMove]
+    properMoves = do
+        (c, ((x, y), orient), before, after) <- templates b
+        (word, anchor) <- allWords3 dict rack c before after
+        let (x', y') = shift (x, y) anchor orient
+        return (Just (word, ((x', y'), orient)))
+
+    shift (x, y) k H = (x-k, y)
+    shift (x, y) k V = (x, y-k)
+
+moveScore :: FullMove -> Score
+moveScore Nothing = 0
+moveScore (Just (w, _)) = wordValue w
+
+-- Exercise, rather hard. Find a FullMove of maximum score. If no word can be
+-- played, return Nothing.
+--
+-- Note that multiple answers can be correct, if they have the same (maximum)
+-- score.
+--
+-- Hint: use maximumBy.
+
+greedyBestMove :: Dict -> Rack -> Board -> FullMove
+-- We use read and show to convert between Bram.FullMove and
+-- Scrabble.FullMove.
+greedyBestMove dict rack b = read (show (Bram.greedyBestMove dict rack b))
+
+-- The main advanced exercise is about making an AI play against itself.
+--
+-- An AI is a function of the following type. It takes three things:
+--
+--   1. The board on which is must make its first move
+--   2. An infinite list of letters from which the new letters on the rack
+--      will be drawn (a LetterStream which is really just a String)
+--   3. A list of future opponent moves.
+--
+-- An AI function must generate a list of moves it wants to play.
+--
+-- The initial rack is the first seven letters from the LetterStream. As your
+-- AI plays letters, it has to replenish its rack using new letters from the
+-- LetterStream; you MUST NOT use replenishRack. You may peek at the next
+-- letters in the LetterStream, we will allow this in the submission, although
+-- this would normally be considered cheating according to Scrabble rules.
+--
+-- When determining its first move, the AI must not look at any future
+-- opponent moves; this is an error.
+--
+-- The opponent will make its first move depending on the AIs first move.
+-- Obviously, that move will change* the board. The second move of the AI must
+-- consider what moves are valid in the updated board. However, the AI can
+-- still not look at the second move of the opponent. And so on.
+--
+-- After every move of the AI and every move of the opponent, the board must
+-- be autoResized. The initial board is guaranteed to be autoResized.
+--
+--
+-- * Unless the opponent decides to pass.
+
+type AI = Board -> LetterStream -> [FullMove] -> [FullMove]
+
+
+-- Exercise, rather hard. No points, but useful for the next exercise.
+--
+-- Example when there's a move possible:
+--
+-- runState (aiOneMove sowpods) (autoResize (boardFromWord "test"),
+--       "", "abcdefghijklmnop", (repeat undefined))
+--   = (Just ("feedbag",((8,5),V)),(*** Exception: Prelude.undefined
+--
+-- runState (aiOneMove sowpods) (autoResize (boardFromWord "test"),
+--       "", "qqqqqqqqqq", (repeat undefined))
+--   = (Nothing,(*** Exception: Prelude.undefined
+
+aiOneMove :: Dict -> State (Board, Rack, LetterStream, [FullMove]) FullMove
+aiOneMove dict = do
+    (b, r, ls, oppMoves) <- get
+    let oppMovesb = map (read.show) oppMoves
+    let (fullMove, (b', r', ls', oppMoves'b)) = runState (Bram.aiOneMove dict) (b, r, ls', oppMovesb)
+    let oppMoves' = map (read.show) oppMoves'b
+    put (b', r', ls', oppMoves')
+    return (read (show fullMove))
+
+
+-- Exercise, rather hard. Create an AI that plays valid moves.
+--
+-- Whenever there is a valid move available for your AI, you must play it, and
+-- you must play a move with the highest score. (It would be too simple if
+-- your AI could just return an infinite list of Nothings.)
+--
+-- You can assume that the other AI plays only valid moves.
+--
+-- Tip: use the State monad and runState or evalState.
+--
+-- If you have made an AI, you can test it against our AI like this:
+--
+--   Bram.connectAI b (convertAItoBram (ai sowpods),
+--       "abcdefgqqqqqqqhijklmnopqrstuvwxyz") (Bram.ai sowpods,
+--       "abcdefghijklmnopqrstuvwxyz")
+--
+-- Your AI does not have to generate the same moves as Bram.ai. But you must
+-- always a move with optimal value on the board.
+
+ai :: Dict -> AI
+ai dict = convertAIfromBram (Bram.ai dict)
+
+convertAIfromBram :: Bram.AI -> AI
+convertAIfromBram ai board stream
+    = map (read . show) . ai board stream . map (read . show)
+convertAItoBram :: AI -> Bram.AI
+convertAItoBram ai board stream
+    = map (read . show) . ai board stream . map (read . show)
+
+-- Utility code given to you:
+--
+-- Merges 2 lists to a combined list with elements alternatingly from either
+-- list.
+mergeLists :: [a] -> [a] -> [a]
+mergeLists (x:xs) ys = x : mergeLists ys xs
+mergeLists [] ys = ys
+
+-- Exercise, rather hard. Given two AIs, and their initial letter streams and racks,
+-- play them against each other. Return the list of all moves, that is, first
+-- a move by the first AI, then by the second AI, then a move by the first AI,
+-- etc.
+--
+-- You are also given an initial board, and a LetterStream for each AI. The
+-- left AI goes first.
+--
+-- As usual, the order of the rack does not matter. You can assume that both
+-- AIs play only valid moves.
+--
+-- Example:
+--
+-- let b = autoResize $ boardFromWord "haskell"
+--
+-- connectAI b (ai sowpods, "abcdefgqqqqqqqhijklmnopqrstuvwxyzabcdefghijkl" ++
+-- undefined) (ai sowpods, "abcdefghijklmnopqrstuvwxyzabcdefghijkl" ++
+-- undefined)
+--
+--   = [Just ("backed",((10,4),V)),Just ("chafed",((7,9),V)),
+--      Just ("feg",((6,13),H)),Just ("bhaji",((9,8),H)),
+--      Just ("qi",((13,7),V)),Just ("polka",((4,11),H)),
+--      Just ("oh",((8,11),V)),Nothing,Just ("qi",((16,7),H)),
+--      Just ("lazy",((17,10),V)),Just ("qi",((17,6),V)),
+--      Just ("ax",((17,12),H)),Just ("ky",((16,14),H)),
+--      Just ("cubeb",((12,5),V)),Nothing,Just ("wich",((10,7),H)), ...
+--
+-- connectAI (autoResize $ boardFromWord "test") (ai sowpods,
+-- "qqqqqqqabcdefghijklmn" ++ undefined) (ai sowpods, "qqqqqqqabcdefghijklmn"
+-- ++ undefined)
+--
+--   = [Just ("qi",((11,6),V)),Nothing,Just ("ma",((7,8),V)),
+--      Just ("farced",((9,6),V)),Just ("be",((8,11),H)), ...
+--
+-- Note that in this example, first the second player passes and then the first player.
+
+connectAI :: Board -> (AI, LetterStream) -> (AI, LetterStream) -> [FullMove]
+connectAI b (ai1, ls1) (ai2, ls2) = map (read.show) $ Bram.connectAI b (bai1, ls1) (bai2, ls2)
+  where
+    bai1 = convertAItoBram ai1
+    bai2 = convertAItoBram ai2
+
+-- Utility code given to you:
+--
+-- Given an initial board, and a list of moves that 2 AIs play against each
+-- other, print all the intermediate boards.
+--
+-- Example:
+--
+--     let b = autoResize $ boardFromWord "haskell"
+--
+--     let alpha = ['a'..'z']
+--
+--     printIntermediateBoards b (connectAI b (ai sowpods, alpha) (ai sowpods, alpha))
+--
+-- Tip: in many terminals, you can adjust the font size with Ctrl+Minus and
+-- Ctrl+Shift+Plus.
+
+printIntermediateBoards :: Board -> [FullMove] -> IO ()
+printIntermediateBoards b moves = do
+    if b /= autoResize b
+      then error "printIntermediateBoards: error: board not autoResized"
+      else return ()
+    printBoard b
+    case moves of
+      [] -> return ()
+      (Nothing:moves') -> printIntermediateBoards b moves'
+      (Just move:moves') -> printIntermediateBoards (newBoard) moves'
+          where newBoard = autoResize (writeMove move b)
+
+
+-- If you have loaded sample solutions, then
+--
+--     Bram.version
+--
+-- will show you what version it is. If Bram.version does not exist, then it was version 1.
