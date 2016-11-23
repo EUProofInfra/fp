@@ -8,7 +8,7 @@ Version history
 - 29 September 14:32: Reset repo for 2016.
 - 15 Nov: Remove distracting old stuff.
 - 18 Nov: Added loads.
-
+- 23 Nov: Some more FAQs. 
 
 How to get the files
 --------------------
@@ -38,6 +38,12 @@ You can also use Git from your laptop or home machine if you install it.
 
 Frequently asked question
 -------------------------
+
+**Q: Does my solution need to be fast?**
+**A:** No. But make sure it returns in half a minute or so. 
+
+**Q: aiOneMove is unclear.**
+**A:** Yes. See https://github.com/uob-fp/fp/commit/0682ce3bed7b3a29d8e832442640be45093bd75e .
 
 **Q: I'm getting this error message! What do I do?**
 
@@ -80,7 +86,7 @@ If you're not on tinky-winky, check out http://supportweb.cs.bham.ac.uk/remote-a
 
 **Q: In autoResize, do we need to make sure the code works with the [[]] and [] board?**
 
-**A:** No. We do not consider [[]] or [] a valid board. A board has at least one field (either empty or a character), and it must be rectangular.
+**A:** No. We do not consider [[]] or [] a valid board. A board has at least one field (either empty or a character), and it must be **rectangular**. So you're guaranteed 
 
 **Q: I ran out of disk space!**
 
