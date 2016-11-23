@@ -9,6 +9,7 @@ Version history
 - 15 Nov: Remove distracting old stuff.
 - 18 Nov: Added loads.
 - 23 Nov: Some more FAQs. 
+- 23 Nov: Added erratum about ``aiOneMove``
 
 How to get the files
 --------------------
@@ -36,8 +37,13 @@ You can also use Git from your laptop or home machine if you install it.
 .. 
 .. Although we prepare the test bench with care, it is always possible that there is a bug. As usual, if you .. suspect there might be a problem, please report it on Facebook.
 
-Frequently asked question
--------------------------
+Errata
+------
+
+(1) There is a bug which prevents you from using the sample solution for ``aiOneMove``. To fix it, go to the line with ``runState``, and change the SECOND ``ls'`` to just ``ls``. Example: https://github.com/uob-fp/fp/commit/d32fe80ee4cd7320fc87813c752faf71bd455027 .
+
+Frequently asked questions
+--------------------------
 
 **Q: Does my solution need to be fast?**
 **A:** No. But make sure it returns in half a minute or so. 
