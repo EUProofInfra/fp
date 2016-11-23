@@ -80,6 +80,8 @@ If you're not on tinky-winky, check out http://supportweb.cs.bham.ac.uk/remote-a
 
 **A:** Change your Scrabble.hs according to these instructions: https://github.com/uob-fp/fp/commit/a11b8d757625d79d16575b0e704ec3c8d87a2979 . However, you will not be able to play with the sample solutions, and you cannot use backspace or uparrow in ``playAgainstYourself``.
 
+Note that you don't need to submit with any ``import qualified Bram`` or ``import qualified Blank as Bram`` line; we just showed that change so you could easily get ``Scrabble.hs`` to compile! If your ``Scrabble.hs`` doesn't use ``Bram.functionName``, then you don't need the import statement.
+
 **Q: The install.sh script does not work on Windows or on my Mac!**
 
 **A:** That's true. See the previous question.
