@@ -840,7 +840,7 @@ aiOneMove :: Dict -> State (Board, Rack, LetterStream, [FullMove]) FullMove
 aiOneMove dict = do
     (b, r, ls, oppMoves) <- get
     let oppMovesb = map (read.show) oppMoves
-    let (fullMove, (b', r', ls', oppMoves'b)) = runState (Bram.aiOneMove dict) (b, r, ls', oppMovesb)
+    let (fullMove, (b', r', ls', oppMoves'b)) = runState (Bram.aiOneMove dict) (b, r, ls, oppMovesb)
     let oppMoves' = map (read.show) oppMoves'b
     put (b', r', ls', oppMoves')
     return (read (show fullMove))
