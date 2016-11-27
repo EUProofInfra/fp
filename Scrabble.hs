@@ -910,14 +910,15 @@ mergeLists [] ys = ys
 --      Just ("ax",((17,12),H)),Just ("ky",((16,14),H)),
 --      Just ("cubeb",((12,5),V)),Nothing,Just ("wich",((10,7),H)), ...
 --
--- connectAI (autoResize $ boardFromWord "test") (ai sowpods,
+-- Note that in the previous example, first the second player passes and then
+-- the first player.
+--
+-- connectAI (autoResize $ boardFromWord "martin") (ai sowpods,
 -- "qqqqqqqabcdefghijklmn" ++ undefined) (ai sowpods, "qqqqqqqabcdefghijklmn"
 -- ++ undefined)
 --
 --   = [Just ("qi",((11,6),V)),Nothing,Just ("ma",((7,8),V)),
 --      Just ("farced",((9,6),V)),Just ("be",((8,11),H)), ...
---
--- Note that in this example, first the second player passes and then the first player.
 
 connectAI :: Board -> (AI, LetterStream) -> (AI, LetterStream) -> [FullMove]
 connectAI b (ai1, ls1) (ai2, ls2) = map (read.show) $ Bram.connectAI b (bai1, ls1) (bai2, ls2)
