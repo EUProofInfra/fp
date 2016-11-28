@@ -12,6 +12,7 @@ Version history
 - 23 Nov: Added erratum about ``aiOneMove``
 - 27 Nov: Added erratum about example for ``connectAI``.
 - 28 Nov: fixed points distribution.
+- 28 Nov: erratum about example for ``allWords2``.
 
 How to get the files
 --------------------
@@ -47,6 +48,8 @@ Errata
 (2) The example for ``connectAI`` is wrong. Here is the correct example: https://github.com/uob-fp/fp/commit/935eb56739a6788e0b04f9e6582646321a930bd7 .
 
 (3) The points distribution was wrong, because there were only 7 medium/hard questions. The first 4 basic questions become 9 points instead of 8.
+
+(4) The second example for ``allWords2`` is off by one.
 
 Frequently asked questions
 --------------------------
