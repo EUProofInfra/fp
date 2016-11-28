@@ -11,6 +11,7 @@ Version history
 - 23 Nov: Some more FAQs. 
 - 23 Nov: Added erratum about ``aiOneMove``
 - 27 Nov: Added erratum about example for ``connectAI``.
+- 28 Nov: fixed points distribution.
 
 How to get the files
 --------------------
@@ -44,6 +45,8 @@ Errata
 (1) There is a bug which prevents you from using the sample solution for ``aiOneMove``. To fix it, go to the line with ``runState``, and change the SECOND ``ls'`` to just ``ls``. Example: https://github.com/uob-fp/fp/commit/d32fe80ee4cd7320fc87813c752faf71bd455027 .
 
 (2) The example for ``connectAI`` is wrong. Here is the correct example: https://github.com/uob-fp/fp/commit/935eb56739a6788e0b04f9e6582646321a930bd7 .
+
+(3) The points distribution was wrong, because there were only 7 medium/hard questions. The first 4 basic questions become 9 points instead of 8.
 
 Frequently asked questions
 --------------------------
