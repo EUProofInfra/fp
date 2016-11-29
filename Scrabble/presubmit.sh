@@ -1,0 +1,20 @@
+#!/bin/bash
+
+CMD="/usr/bin/env python3 presubmit-res/presubmit.py"
+
+if hostname -f | grep bham.ac.uk > /dev/null ; then
+	if hostname -f | grep cca-ug04 > /dev/null ; then
+		/bin/tcsh -c "module load python/3.5; module load ghc; $CMD"
+	else
+        echo "ERROR: You must execute this on a lab machine."
+        exit 1
+    fi
+else
+	echo Warning: you are not executing this on a lab machine.
+	echo Warning: you are not executing this on a lab machine.
+	echo Warning: you are not executing this on a lab machine.
+	echo
+	echo I will continue in 5 seconds.
+	sleep 5
+	$CMD
+fi
