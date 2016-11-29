@@ -9,6 +9,24 @@ AUXILIARY = [
 
 VERBOSE=False
 
+MODULE_WHITELIST=frozenset([
+
+    # custom
+    'Sowpods', 'Types', 'Blank',
+
+    # base
+    'Control.Applicative', 'Control.Arrow', 'Control.Category', 'Control.Concurrent', 'Control.Concurrent.Chan', 'Control.Concurrent.MVar', 'Control.Concurrent.QSem', 'Control.Concurrent.QSemN', 'Control.Exception', 'Control.Exception.Base', 'Control.Monad', 'Control.Monad.Fail', 'Control.Monad.Fix', 'Control.Monad.IO.Class', 'Control.Monad.Instances', 'Control.Monad.ST', 'Control.Monad.ST.Lazy', 'Control.Monad.ST.Lazy.Safe', 'Control.Monad.ST.Lazy.Unsafe', 'Control.Monad.ST.Safe', 'Control.Monad.ST.Strict', 'Control.Monad.ST.Unsafe', 'Control.Monad.Zip', 'Data.Bifunctor', 'Data.Bits', 'Data.Bool', 'Data.Char', 'Data.Coerce', 'Data.Complex', 'Data.Data', 'Data.Dynamic', 'Data.Either', 'Data.Eq', 'Data.Fixed', 'Data.Foldable', 'Data.Function', 'Data.Functor', 'Data.Functor.Classes', 'Data.Functor.Compose', 'Data.Functor.Const', 'Data.Functor.Identity', 'Data.Functor.Product', 'Data.Functor.Sum', 'Data.IORef', 'Data.Int', 'Data.Ix', 'Data.Kind', 'Data.List', 'Data.List.NonEmpty', 'Data.Maybe', 'Data.Monoid', 'Data.Ord', 'Data.Proxy', 'Data.Ratio', 'Data.STRef', 'Data.STRef.Lazy', 'Data.STRef.Strict', 'Data.Semigroup', 'Data.String', 'Data.Traversable', 'Data.Tuple', 'Data.Type.Bool', 'Data.Type.Coercion', 'Data.Type.Equality', 'Data.Typeable', 'Data.Typeable.Internal', 'Data.Unique', 'Data.Version', 'Data.Void', 'Data.Word', 'Debug.Trace', 'Foreign', 'Foreign.C', 'Foreign.C.Error', 'Foreign.C.String', 'Foreign.C.Types', 'Foreign.Concurrent', 'Foreign.ForeignPtr', 'Foreign.ForeignPtr.Safe', 'Foreign.ForeignPtr.Unsafe', 'Foreign.Marshal', 'Foreign.Marshal.Alloc', 'Foreign.Marshal.Array', 'Foreign.Marshal.Error', 'Foreign.Marshal.Pool', 'Foreign.Marshal.Safe', 'Foreign.Marshal.Unsafe', 'Foreign.Marshal.Utils', 'Foreign.Ptr', 'Foreign.Safe', 'Foreign.StablePtr', 'Foreign.Storable', 'Numeric', 'Numeric.Natural', 'Prelude', 'System.CPUTime', 'System.Console.GetOpt', 'System.Environment', 'System.Exit', 'System.IO', 'System.IO.Error', 'System.IO.Unsafe', 'System.Info', 'System.Timeout', 'Text.ParserCombinators.ReadP', 'Text.ParserCombinators.ReadPrec', 'Text.Printf', 'Text.Read', 'Text.Read.Lex', 'Text.Show', 'Text.Show.Functions', 'Unsafe.Coerce',
+
+    # mtl
+    'Control.Monad.Cont', 'Control.Monad.Cont.Class', 'Control.Monad.Error', 'Control.Monad.Error.Class', 'Control.Monad.Except', 'Control.Monad.Identity', 'Control.Monad.List', 'Control.Monad.RWS', 'Control.Monad.RWS.Class', 'Control.Monad.RWS.Lazy', 'Control.Monad.RWS.Strict', 'Control.Monad.Reader', 'Control.Monad.Reader.Class', 'Control.Monad.State', 'Control.Monad.State.Class', 'Control.Monad.State.Lazy', 'Control.Monad.State.Strict', 'Control.Monad.Trans', 'Control.Monad.Writer', 'Control.Monad.Writer.Class', 'Control.Monad.Writer.Lazy', 'Control.Monad.Writer.Strict',
+
+    # random
+    'System.Random',
+
+    # deepseq
+    'Control.DeepSeq',
+])
+
 import os, os.path, sys
 
 def error(fmt, *args, **kw):
@@ -19,7 +37,7 @@ def banner():
     print(
 """
 
-Presubmit test, v1.
+Presubmit test, v2.
 
 This script will look at your Scrabble.hs to see whether we can accept it as
 is. It will either give you an error, or it will say that you are ready for
@@ -142,7 +160,12 @@ def main():
     step_readline_unsafeio(s)
     step_safe(s)
     step_types(s)
-    step_final(s)
+    step_harness(s)
+    step_modules(s)
+
+    print()
+    print("SUCCESS. It seems that everything will go smoothly when we will test it.")
+
 
 def step_bram_blank(s):
     printstep("Changing Bram to Blank, and compiling.")
@@ -222,7 +245,7 @@ def step_types(s):
     testcmd(s, "cd tmp-presubmit && ghc Scrabble")
     succ("compiled.")
 
-def step_final(s):
+def step_harness(s):
     printstep("Compiling against dummy test harness.")
 
     testcmd(s, "cd tmp-presubmit && runhaskell Facade.hs 0")
@@ -234,9 +257,27 @@ def step_final(s):
     assertcmd("rm -rf tmp-presubmit")
     succ("removed temporary directory 'tmp-presubmit'")
 
-    print()
-    print("SUCCESS. It seems that everything will go smoothly when we will test it.")
+def step_modules(s):
+    printstep("Checking which modules are imported.")
+    module_lines = [line.strip() for line in s if line.strip().startswith("import")]
 
+    def module_from_line(line):
+        if line.startswith("import qualified "):
+            line = line[len("import qualified "):]
+        elif line.startswith("import "):
+            line = line[len("import "):]
+        else:
+            error("could not parse import line: " + repr(line))
+
+        module, _, _ = line.partition(' ')
+        return module
+
+    modules = list(map(module_from_line, module_lines))
+
+    if not (set(modules) <= MODULE_WHITELIST):
+        error("You are importing modules which we have not explicitly marked as okay: {}. Please ask on Facebook whether they are okay.", ', '.join(set(modules) - MODULE_WHITELIST))
+
+    succ("using only whitelisted modules")
 
 def get_type_fragments():
     f = open("presubmit-res/Types.hs")
