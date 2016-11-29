@@ -13,6 +13,12 @@ Version history
 - 27 Nov: Added erratum about example for ``connectAI``.
 - 28 Nov: fixed points distribution.
 - 28 Nov: erratum about example for ``allWords2``.
+- 29 Nov: presubmit
+
+New! Presubmit! You must run this before you submit. It will check that your solution can be marked.
+----------------------------------------------------------------------------------------------------
+
+Run ``git pull`` then ``sh presubmit.sh``. This will run a number of checks. Please write a comment on Facebook if you get errors.
 
 How to get the files
 --------------------
