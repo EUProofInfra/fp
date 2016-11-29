@@ -3,7 +3,7 @@
 CMD="/usr/bin/env python3 presubmit-res/presubmit.py"
 
 if hostname -f | grep bham.ac.uk > /dev/null ; then
-	if hostname -f | grep cca-ug04 > /dev/null ; then
+	if hostname -f | grep cca-\[ul\]g04 > /dev/null ; then
 		/bin/tcsh -c "module load python/3.5; module load ghc; env -u LC_CTYPE $CMD"
 	else
         echo "ERROR: You must execute this on a lab machine."
