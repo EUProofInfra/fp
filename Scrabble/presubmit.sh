@@ -14,7 +14,7 @@ else
 	echo Warning: you are not executing this on a lab machine.
 	echo Warning: you are not executing this on a lab machine.
 	echo
-	echo I will continue in 5 seconds.
-	sleep 5
+	echo I will continue in 3 seconds.
+	sleep 3
 	$CMD
 fi

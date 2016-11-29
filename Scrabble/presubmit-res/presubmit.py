@@ -37,7 +37,7 @@ def banner():
     print(
 """
 
-Presubmit test, v2.
+Presubmit test, v3.
 
 This script will look at your Scrabble.hs to see whether we can accept it as
 is. It will either give you an error, or it will say that you are ready for

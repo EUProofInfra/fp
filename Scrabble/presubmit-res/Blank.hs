@@ -39,6 +39,7 @@ replenishRack x1 = undefined
 allWords1 :: Dict -> Char -> [String]
 allWords1 x1 x2 = undefined
 allWords2 :: Dict -> Char -> Int -> Int -> [(String, Int)]
+allWords2 _ 'x' 1 1 = [("ax",1),("axe",1),("ex",1),("exo",1),("ox",1),("oxo",1),("oxy",1),("xi",0),("xu",0)]
 allWords2 x1 x2 x3 x4 = undefined
 allWords3 :: Dict -> Rack -> Char -> Int -> Int -> [(String, Int)]
 allWords3 x1 x2 x3 x4 x5 = undefined
