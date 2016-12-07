@@ -14,6 +14,12 @@ Version history
 - 28 Nov: fixed points distribution.
 - 28 Nov: erratum about example for ``allWords2``.
 - 29 Nov: presubmit
+- 7 Dec: marking script
+
+Marking script
+--------------
+
+You should have received your mark on Canvas. Today (7 Dec) we'll send you the output of the marking script. We have put the marking script itself in this repository for your perusal; this includes the tested inputs/outputs (in ``TestBench.hs``); we have used wrapper functions from ``TestHelpers.hs``. To reproduce the feedback, simply put a copy (not the original!) of your solution as ``Scrabble.hs`` in that folder and run ``make``.
 
 New! Presubmit! You must run this before you submit. It will check that your solution can be marked.
 ----------------------------------------------------------------------------------------------------
